@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ApiCaller from './api_caller';
+import LegendGraph from './graph';
 import './index.css';
 
 function Square(props) {
@@ -128,7 +129,7 @@ class Game extends React.Component {
 // ========================================
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<div><Game /><ApiCaller /></div>);
+root.render(<div><Game /><ApiCaller /><LegendGraph /></div>);
 
 function calculateWinner(squares) {
   const lines = [
