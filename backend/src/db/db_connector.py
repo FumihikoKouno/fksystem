@@ -5,10 +5,10 @@ from util.constant import Constant
 
 class DbConnector:
 
+  TABLE_NAME = 'AccountBookValues'
+
   ACCOUNT_BOOK_DATA_TEMPLATE = {
-    'tablename': None,
-    'key0': None, 'key1': None, 'key2': None, 'key3': None, 'key4': None,
-    'key5': None, 'key6': None, 'key7': None, 'key8': None, 'key9': None,
+    'tableName': None,
     'value0': None, 'value1': None, 'value2': None, 'value3': None, 'value4': None,
     'value5': None, 'value6': None, 'value7': None, 'value8': None, 'value9': None,
   }
@@ -46,19 +46,35 @@ class DbConnector:
 
 
   def get_all(self):
-    self.cursor.execute('select * from AccountBook;')
+    self.cursor.execute('select * from AccountBookValues;')
     return pd.DataFrame(
         self.cursor.fetchall(),
         columns=list([d.name for d in self.cursor.description])
     )
 
 
-  def upsert(self, data):
+  def delete(self, data):
+    sql = 'DELETE FROM %s WHERE %s;'
+    columns = [ column for column in data.columns ]
+    for row_data in data.itertuples():
+      row = [ data for data in row_data[1:] ]
+      conditions = ' AND '.join([ '%s=\'%s\'' % (columns[i], row[i]) for i in range(len(row)) ])
+      self.cursor.execute(sql % (DbConnector.TABLE_NAME, conditions))
+      self.connection.commit()
+
+
+  def upsert(self, data, *primary_nums):
+    if len(primary_nums) > 0:
+      delete_data = copy.deepcopy(data)
+      items = [ 'value%d' % num for num in primary_nums ]
+      items.append('tableName')
+      delete_data = delete_data.filter(items=items, axis='columns')
+      self.delete(delete_data)
+
     values = []
     for row in data.itertuples():
       values.append('(%s)' % ', '.join([ 'NULL' if i is None else '\'%s\'' % str(i) for i in row[1:] ]))
 
-    sql = 'INSERT INTO AccountBook (%s) VALUES %s;' % (', '.join(data.columns), ', '.join(values))
-    print(sql)
+    sql = 'INSERT INTO %s (%s) VALUES %s;' % (DbConnector.TABLE_NAME, ', '.join(data.columns), ', '.join(values))
     self.cursor.execute(sql)
     self.connection.commit()
