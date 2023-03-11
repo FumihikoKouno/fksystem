@@ -41,6 +41,11 @@ class DbConnector:
 
 
   @classmethod
+  def get_date_string(cls, date_data):
+    return date_data.strftime('%Y-%m-%d')
+
+
+  @classmethod
   def get_datetime_string(cls, datetime_data):
     return datetime_data.strftime('%Y-%m-%d %H:%M:%S%z')
 

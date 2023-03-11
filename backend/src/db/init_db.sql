@@ -35,3 +35,9 @@ INSERT
   VALUES
   ('気象', '日時', '地点', '天気', '気温 (℃)', '降水確率(%)', '降水量 (mm/h)', '湿度(%)', '風向', '風速 (m/s)');
 
+INSERT
+  INTO AccountBookKeys 
+  (tableName, key0, key1, key2, key3, key4, key5, key6)
+  VALUES
+  ('株価', '企業名', '日付', '始値', '高値', '安値', '終値', '売買高(株)');
+

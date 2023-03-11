@@ -1,7 +1,6 @@
 from util.constant import Constant
-from db.db_connector import DbConnector
+from data.crawler import Crawler
 
 Constant.init()
+Crawler.crawl_all()
 
-with DbConnector() as c:
-  print(c.test())
