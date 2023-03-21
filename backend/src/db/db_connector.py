@@ -50,12 +50,26 @@ class DbConnector:
     return datetime_data.strftime('%Y-%m-%d %H:%M:%S%z')
 
 
-  def get_all(self):
-    self.cursor.execute('select * from AccountBookValues;')
-    return pd.DataFrame(
-        self.cursor.fetchall(),
+  def _format_select_result(self, result, t=False):
+    formatted_result = pd.DataFrame(
+        result,
         columns=list([d.name for d in self.cursor.description])
     )
+
+    if t:
+      return formatted_result.T
+    else:
+      return formatted_result
+
+
+  def get_data_list(self):
+    self.cursor.execute('select * from AccountBookKeys;')
+    return self._format_select_result(self.cursor.fetchall())
+
+
+  def get_all(self):
+    self.cursor.execute('select * from AccountBookValues;')
+    return self._format_select_result(self.cursor.fetchall())
 
 
   def delete(self, data):

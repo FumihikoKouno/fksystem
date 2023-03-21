@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { API_SERVER } from './constant.js';
 import React from "react";
 import {
   Chart as ChartJS,
@@ -24,6 +26,7 @@ export default class LegendGraph extends React.Component {
       Tooltip,
       Legend
     );
+    this.state = { data_list: null };
   }
 
   render() {
@@ -43,10 +46,23 @@ export default class LegendGraph extends React.Component {
     };
 
     return (
-      <Line
-        data={graphData}
-        options={options}
-      />
+      <div>
+        <Line
+          data={graphData}
+          options={options}
+        />
+        <button
+            onClick={() => {
+              axios.get(API_SERVER + 'data/list')
+                   .then(response => {
+                      console.log(response.data);
+                      this.setState({ data_list: response.data })
+                   });
+            }}
+        >
+            { this.state.data_list }
+        </button>
+      </div>
     );
   }
 }

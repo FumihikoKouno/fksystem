@@ -129,7 +129,7 @@ class Game extends React.Component {
 // ========================================
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<div><Game /><ApiCaller /><LegendGraph /></div>);
+root.render(<div><Game /><LegendGraph /></div>);
 
 function calculateWinner(squares) {
   const lines = [
