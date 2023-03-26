@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import ApiCaller from './api_caller';
 import LegendGraph from './graph';
 import './index.css';
 

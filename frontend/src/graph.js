@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { API_SERVER } from './constant.js';
+import Dropdown from 'react-bootstrap/Dropdown';
 import React from "react";
 import {
   Chart as ChartJS,
@@ -13,20 +13,24 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-
 export default class LegendGraph extends React.Component {
   constructor(props) {
     super(props);
     ChartJS.register(
       CategoryScale,
+      Legend,
+      LineElement,
       LinearScale,
       PointElement,
-      LineElement,
       Title,
       Tooltip,
-      Legend
     );
-    this.state = { data_list: null };
+    this.state = {
+      data_keys: null,
+      graph_x: null,
+      graph_y: null,
+      graph_data: null,
+    };
   }
 
   render() {
@@ -45,6 +49,19 @@ export default class LegendGraph extends React.Component {
       maintainAspectRation: false,
     };
 
+    let dropdown;
+    if (this.state.data_values === null) {
+      dropdown = 'Button';
+    } else {
+      dropdown = 'test';
+      //<Dropdown>
+      //             <Dropdown.Toggle> DropDown </Dropdown.Toggle>
+      //             <Dropdown.Menu>
+      //               { this.state.data_values.map( (data) => { return <Dropdown.Item> data[0] </Dropdown.Item/> } ) }
+      //             </Dropdown.Menu>
+      //           </Dropdown>
+    }
+
     return (
       <div>
         <Line
@@ -53,14 +70,18 @@ export default class LegendGraph extends React.Component {
         />
         <button
             onClick={() => {
-              axios.get(API_SERVER + 'data/list')
-                   .then(response => {
-                      console.log(response.data);
-                      this.setState({ data_list: response.data })
+              fetch(API_SERVER + 'data/list', {method: 'GET'})
+                   .then(response => response.json())
+                   .then(data => {
+                      const json_data = JSON.parse(data);
+                      this.setState({
+                          data_keys: json_data.columns,
+                          data_values: json_data.data,
+                      });
                    });
             }}
         >
-            { this.state.data_list }
+        { dropdown }
         </button>
       </div>
     );
