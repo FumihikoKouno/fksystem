@@ -27,10 +27,29 @@ export default class LegendGraph extends React.Component {
     );
     this.state = {
       data_keys: null,
-      graph_x: null,
-      graph_y: null,
-      graph_data: null,
+      data_values: [],
+      data_table: 'Table',
+      data_x: 'Horizontal Axis',
+      data_y: 'Vertical Axis',
+      data: null,
     };
+    this.fetchGraphKeys = this.fetchGraphKeys.bind(this);
+  }
+
+  componentDidMount() {
+    this.fetchGraphKeys();
+  }
+
+  fetchGraphKeys() {
+    fetch(API_SERVER + 'data/list', {method: 'GET'})
+         .then(response => response.json())
+         .then(data => {
+            const json_data = JSON.parse(data);
+            this.setState({
+                data_keys: json_data.columns,
+                data_values: json_data.data,
+            });
+         });
   }
 
   render() {
@@ -49,42 +68,109 @@ export default class LegendGraph extends React.Component {
       maintainAspectRation: false,
     };
 
-    let dropdown;
-    if (this.state.data_values === null) {
-      dropdown = 'Button';
-    } else {
-      dropdown = 'test';
-      //<Dropdown>
-      //             <Dropdown.Toggle> DropDown </Dropdown.Toggle>
-      //             <Dropdown.Menu>
-      //               { this.state.data_values.map( (data) => { return <Dropdown.Item> data[0] </Dropdown.Item/> } ) }
-      //             </Dropdown.Menu>
-      //           </Dropdown>
-    }
 
-    return (
-      <div>
-        <Line
-          data={graphData}
-          options={options}
-        />
-        <button
-            onClick={() => {
-              fetch(API_SERVER + 'data/list', {method: 'GET'})
-                   .then(response => response.json())
-                   .then(data => {
-                      const json_data = JSON.parse(data);
-                      this.setState({
-                          data_keys: json_data.columns,
-                          data_values: json_data.data,
-                      });
-                   });
-            }}
-        >
-        { dropdown }
-        </button>
-      </div>
-    );
+    return <>
+      <Line
+        data={graphData}
+        options={options}
+      />
+
+      <table frame='border' cellPadding='5%'>
+        <thead>
+          <tr>
+            <th>
+              Key
+            </th>
+            <th>
+              Value
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align='right'>
+              Table
+            </td>
+            <td>
+              <Dropdown>
+                <Dropdown.Toggle>
+                  { this.state.data_table }
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {
+                    this.state.data_values.map( 
+                      (data) => {
+                        return (
+                          <Dropdown.Item key={'table_' + data[0]} onClick={()=>this.setState({data_table: data[0]})}>
+                            { data[0] }
+                          </Dropdown.Item>
+                        )
+                      }
+                    )
+                  }
+                </Dropdown.Menu>
+              </Dropdown>
+            </td>
+          </tr>
+          <tr>
+            <td align='right'>
+              Horizontal Axis
+            </td>
+            <td>
+              <Dropdown>
+                <Dropdown.Toggle>
+                  { this.state.data_x }
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {
+                    this.state.data_values.filter((data)=>{ return this.state.data_table === data[0] }).map( 
+                      (data) => {
+                        return data.filter((value)=>{ return value !== null && value !== this.state.data_table }).map((value) => {
+                          return (
+                            <Dropdown.Item key={'x_' + value} onClick={()=>this.setState({data_x: value})}>
+                              { value }
+                            </Dropdown.Item>
+                          )
+                        })
+                      }
+                    )
+                  }
+                </Dropdown.Menu>
+              </Dropdown>
+            </td>
+          </tr>
+          <tr>
+            <td align='right'>
+              Vertical Axis
+            </td>
+            <td>
+              <Dropdown>
+                <Dropdown.Toggle>
+                  { this.state.data_y }
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {
+                    this.state.data_values.filter((data)=>{ return this.state.data_table === data[0] }).map( 
+                      (data) => {
+                        return data.filter((value)=>{ return value !== null && value !== this.state.data_table }).map((value) => {
+                          return (
+                            <Dropdown.Item key={'y_' + value} onClick={()=>this.setState({data_y: value})}>
+                              { value }
+                            </Dropdown.Item>
+                          )
+                        })
+                      }
+                    )
+                  }
+                </Dropdown.Menu>
+              </Dropdown>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+
+    </>
   }
 }
 
