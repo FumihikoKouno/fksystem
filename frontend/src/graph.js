@@ -26,39 +26,54 @@ export default class LegendGraph extends React.Component {
       Tooltip,
     );
     this.state = {
-      data_keys: null,
-      data_values: [],
+      data_keys: [],
+      data_values: null,
       data_table: 'Table',
       data_x: 'Horizontal Axis',
       data_y: 'Vertical Axis',
+      graph_x: [],
+      graph_y: [],
       data: null,
     };
     this.fetchGraphKeys = this.fetchGraphKeys.bind(this);
+    this.fetchGraphValues = this.fetchGraphValues.bind(this);
   }
 
   componentDidMount() {
     this.fetchGraphKeys();
   }
 
+  fetchGraphValues(table) {
+    fetch(API_SERVER + 'data/' + table + '/values', {method: 'GET'})
+         .then(response => response.json())
+         .then(data => {
+            const json_data = JSON.parse(data);
+            console.log(json_data.data);
+            this.setState({
+                data_table: table,
+                data_values: json_data.data,
+            });
+         });
+  }
+
   fetchGraphKeys() {
-    fetch(API_SERVER + 'data/list', {method: 'GET'})
+    fetch(API_SERVER + 'data/keys', {method: 'GET'})
          .then(response => response.json())
          .then(data => {
             const json_data = JSON.parse(data);
             this.setState({
-                data_keys: json_data.columns,
-                data_values: json_data.data,
+                data_keys: json_data.data,
             });
          });
   }
 
   render() {
     const graphData = {
-      labels: [1, 2, 3, 4, 5, 6],
+      labels: this.state.graph_x,
       datasets: [
         {
           label: "test1",
-          data: [1, 31, 32, 12, 33, 2],
+          data: this.state.graph_y,
           borderColor: "rgb(75,192,129)",
         }
       ]
@@ -67,7 +82,6 @@ export default class LegendGraph extends React.Component {
     const options: {} = {
       maintainAspectRation: false,
     };
-
 
     return <>
       <Line
@@ -98,10 +112,13 @@ export default class LegendGraph extends React.Component {
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   {
-                    this.state.data_values.map( 
+                    this.state.data_keys.map( 
                       (data) => {
                         return (
-                          <Dropdown.Item key={'table_' + data[0]} onClick={()=>this.setState({data_table: data[0]})}>
+                          <Dropdown.Item
+                              key={'table_' + data[0]}
+                              onClick={()=>this.fetchGraphValues(data[0])}
+                          >
                             { data[0] }
                           </Dropdown.Item>
                         )
@@ -123,11 +140,20 @@ export default class LegendGraph extends React.Component {
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   {
-                    this.state.data_values.filter((data)=>{ return this.state.data_table === data[0] }).map( 
+                    this.state.data_keys.filter((data)=>{ return this.state.data_table === data[0] }).map( 
                       (data) => {
                         return data.filter((value)=>{ return value !== null && value !== this.state.data_table }).map((value) => {
                           return (
-                            <Dropdown.Item key={'x_' + value} onClick={()=>this.setState({data_x: value})}>
+                            <Dropdown.Item
+                                key={'x_' + value}
+                                onClick={() => {
+                                    const graph_x_index = data.indexOf(value);
+                                    this.setState({
+                                        graph_x: this.state.data_values.map((data_value) => data_value[graph_x_index]),
+                                        data_x: value
+                                    })
+                                }}
+                            >
                               { value }
                             </Dropdown.Item>
                           )
@@ -150,11 +176,20 @@ export default class LegendGraph extends React.Component {
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   {
-                    this.state.data_values.filter((data)=>{ return this.state.data_table === data[0] }).map( 
+                    this.state.data_keys.filter((data)=>{ return this.state.data_table === data[0] }).map( 
                       (data) => {
                         return data.filter((value)=>{ return value !== null && value !== this.state.data_table }).map((value) => {
                           return (
-                            <Dropdown.Item key={'y_' + value} onClick={()=>this.setState({data_y: value})}>
+                            <Dropdown.Item
+                                key={'y_' + value}
+                                onClick={() => {
+                                    const graph_y_index = data.indexOf(value);
+                                    this.setState({
+                                        graph_y: this.state.data_values.map((data_value) => data_value[graph_y_index]),
+                                        data_y: value
+                                    })
+                                }}
+                            >
                               { value }
                             </Dropdown.Item>
                           )
